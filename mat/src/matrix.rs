@@ -1,7 +1,7 @@
 use std::fmt;
 use std::ops:;{Add, Mul};
 use rand::Rng;
-use crate:;macros::*;
+use crate::macros::*;
 
 #[derive(Debug, Clone)]
 pub struct Matrix{

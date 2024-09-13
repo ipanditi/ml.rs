@@ -1,4 +1,4 @@
-use matrix::matrix::Matrix;
+use mat::matrix::Matrix;
 
 use crate::activations::Activation;
 
