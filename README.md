@@ -26,13 +26,13 @@ Make sure you have Rust installed on your machine. If not, you can install it us
 
 ```
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-Clone this repository:
 ```
+Clone this repository:
 ```
 git clone https://github.com/your-username/rust-neural-network.git
 cd rust-neural-network
-Build the project:
 ```
+Build the project:
 ```
 cargo build --release
 ```
@@ -45,8 +45,22 @@ cargo run --release
 This implementation allows you to define a neural network with any number of layers. For each layer, you specify the number of neurons and the activation function. The architecture is simple but flexible enough for basic machine learning tasks.
 
 ```
-let nn = NeuralNetwork::new(vec![Layer::new(2, 3, Activation::ReLU),
-                                 Layer::new(3, 1, Activation::Sigmoid)]);
+pub fn new(layers: Vec<usize>, activation:Activation, learning_rate:f64) -> Self {
+        let mut weights = vec![];
+        let mut biases = vec![];
+        for i in 0..layers.len() -1{
+            weights.push(Matrix::random(layers[i+1], layers[i]));
+            biases.push(Matrix::random(layers[i+1], 1));
+        }
+        Network {
+            layers,
+            weights,
+            biases,
+            data: vec![],
+            activation,
+            learning_rate
+        }
+}
 ```
 
 Layers: The network consists of fully connected layers where each neuron is connected to every neuron in the next layer.
@@ -62,7 +76,17 @@ Loss Function
 The default loss function is Mean Squared Error (MSE), but this can be modified or extended to support other loss functions.
 
 ```
-nn.train(&training_data, &expected_output, learning_rate, epochs);
+pub fn train(&mut self, inputs: Vec<Vec<f64>>, targets: Vec<Vec<f64>>, epochs: u32){
+        for i in 1..=epochs {
+            if epochs<100 || i%(epochs/100) == 0{
+                println!("Epoch {} of {}", i,epochs);
+            }
+            for j in 0..inputs.len() {
+                let outputs = self.feed_forward(Matrix::from(inputs[j].clone()));
+                self.back_propagate(outputs, Matrix::from(targets[j].clone()));
+            }
+        }
+}
 ```
 
 training_data: Your input data for training.
@@ -73,32 +97,21 @@ Example:
 XOR problem.
 
 ```
-fn main() {
-    let mut nn = NeuralNetwork::new(vec![
-        Layer::new(2, 2, Activation::Sigmoid),
-        Layer::new(2, 1, Activation::Sigmoid),
-    ]);
-
-    let training_data = vec![
-        vec![0.0, 0.0],
-        vec![0.0, 1.0],
+fn main(){
+    env::set_var("RUST_BACKTRACE", "1");
+    let inputs = vec![
+        vec![0.0,0.0],
+        vec![0.0,1.0],
         vec![1.0, 0.0],
-        vec![1.0, 1.0],
+        vec![1.0,1.0],
     ];
-    
-    let expected_output = vec![
-        vec![0.0],
-        vec![1.0],
-        vec![1.0],
-        vec![0.0],
-    ];
-    
-    nn.train(&training_data, &expected_output, 0.1, 10000);
-    
-    println!("Results:");
-    for data in &training_data {
-        println!("{:?} -> {:?}", data, nn.predict(data));
-    }
+    let targets = vec![vec![0.0], vec![1.0], vec![0.0], vec![1.0]];
+    let mut network = Network::new(vec![2,3,1], SIGMOID, 0.5);
+    network.train(inputs, targets, 100000);
+    println!("{:?}", network.feed_forward(Matrix::from(vec![0.0, 0.0])));
+	  println!("{:?}", network.feed_forward(Matrix::from(vec![0.0, 1.0])));
+	  println!("{:?}", network.feed_forward(Matrix::from(vec![1.0, 0.0])));
+	  println!("{:?}", network.feed_forward(Matrix::from(vec![1.0, 1.0])));
 }
 
 Results:
