@@ -29,8 +29,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 Clone this repository:
 ```
-git clone https://github.com/your-username/rust-neural-network.git
-cd rust-neural-network
+git clone https://github.com/ipanditi/ml.rs.git
+cd ml.rs
 ```
 Build the project:
 ```
